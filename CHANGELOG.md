@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/cpoepke/obsidian-docker/compare/v0.1.3...v0.1.4) (2026-04-05)
+
+
+### Features
+
+* push versioned Docker images on release via release-please workflow ([18ab1d3](https://github.com/cpoepke/obsidian-docker/commit/18ab1d33d855c9505f8ec1ee6ae5fe046f4cdcae))
+
 ## [0.1.3](https://github.com/cpoepke/obsidian-docker/compare/v0.1.2...v0.1.3) (2026-04-05)
 
 
