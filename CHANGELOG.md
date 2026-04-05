@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/cpoepke/obsidian-docker/compare/v0.1.2...v0.1.3) (2026-04-05)
+
+
+### Bug Fixes
+
+* trigger versioned Docker image push on release events ([15389f1](https://github.com/cpoepke/obsidian-docker/commit/15389f1cfac0d16f01a212453c0deefdfc6e19f9))
+
 ## [0.1.2](https://github.com/cpoepke/obsidian-docker/compare/v0.1.1...v0.1.2) (2026-04-05)
 
 
