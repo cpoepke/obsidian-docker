@@ -60,10 +60,20 @@ jobs:
       - name: Start container
         run: docker compose up -d
 
+      - name: Wait for Obsidian REST API
+        run: |
+          echo "Waiting for REST API (up to 180s)..."
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:27123/ >/dev/null 2>&1; then
+              echo "REST API ready after $((i*2))s"
+              break
+            fi
+            sleep 2
+          done
+
       - name: Seed test vault
         run: |
           chmod +x tests/seed-vault.sh
-          sleep 10
           ./tests/seed-vault.sh
 
       - name: Extract Obsidian REST API key
@@ -75,7 +85,14 @@ jobs:
             echo "key=${KEY}" >> "$GITHUB_OUTPUT"
             echo "Extracted API key: ${KEY:0:16}..."
           else
-            echo "WARNING: No API key found"
+            echo "WARNING: No API key found, retrying from /config..."
+            KEY=$(docker exec obsidian cat /config/obsidian/plugins/obsidian-local-rest-api/data.json 2>/dev/null | jq -r '.apiKey // empty' || true)
+            if [ -n "$KEY" ]; then
+              echo "key=${KEY}" >> "$GITHUB_OUTPUT"
+              echo "Extracted API key from /config: ${KEY:0:16}..."
+            else
+              echo "ERROR: No API key found in either location"
+            fi
           fi
 
       - name: Run integration tests
