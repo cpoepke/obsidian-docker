@@ -83,8 +83,9 @@ if [ ! -f "${VAULT_CONFIG_DIR}/community-plugins.json" ]; then
 fi
 
 # Copy pre-installed plugins into vault if not already there
-if [ -d "${CONFIG_DIR}/plugins" ]; then
-    for plugin_dir in "${CONFIG_DIR}/plugins"/*/; do
+# Source is /opt/obsidian-plugins (built into image, not shadowed by PVC mounts)
+if [ -d "/opt/obsidian-plugins/plugins" ]; then
+    for plugin_dir in "/opt/obsidian-plugins/plugins"/*/; do
         plugin_name=$(basename "$plugin_dir")
         if [ ! -d "${VAULT_CONFIG_DIR}/plugins/${plugin_name}" ]; then
             cp -r "$plugin_dir" "${VAULT_CONFIG_DIR}/plugins/${plugin_name}"

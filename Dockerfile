@@ -123,9 +123,9 @@ RUN chmod +x /usr/local/bin/install-plugins.sh /usr/local/bin/entrypoint.sh /usr
 # Copy default plugin configuration
 COPY config/community-plugins.json /config/defaults/community-plugins.json
 
-# Install plugins at build time, then fix ownership
-RUN /usr/local/bin/install-plugins.sh /config/obsidian && \
-    chown -R obsidian:obsidian /vaults /config
+# Install plugins at build time to a non-volume path so they survive PVC mounts
+RUN /usr/local/bin/install-plugins.sh /opt/obsidian-plugins && \
+    chown -R obsidian:obsidian /vaults /config /opt/obsidian-plugins
 
 # Ports:
 #   27124 - Local REST API (HTTPS)

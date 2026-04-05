@@ -41,6 +41,7 @@ AUTH_URL=$(echo "${GIT_REPO_URL}" | sed "s|https://|https://${GITHUB_TOKEN}@|")
 git config --global user.name "${GIT_USER}"
 git config --global user.email "${GIT_EMAIL}"
 git config --global init.defaultBranch main
+git config --global --add safe.directory "${VAULT_PATH}"
 
 # ── Clone or pull ───────────────────────────────────────────────────────────
 
