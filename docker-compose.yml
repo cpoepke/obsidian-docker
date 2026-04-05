@@ -1,0 +1,28 @@
+services:
+  obsidian:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: obsidian
+    shm_size: "256m"
+    ports:
+      - "27123:27123"
+      - "27124:27124"
+    volumes:
+      - vault-data:/vaults/default
+      - obsidian-config:/config/obsidian
+    environment:
+      - OBSIDIAN_VAULT_PATH=/vaults/default
+      - LOCAL_REST_API_PORT=27124
+      - DISPLAY=:99
+      - ELECTRON_DISABLE_GPU=1
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:27123/"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 45s
+
+volumes:
+  vault-data:
+  obsidian-config:
