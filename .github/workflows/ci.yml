@@ -66,10 +66,22 @@ jobs:
           sleep 10
           ./tests/seed-vault.sh
 
+      - name: Extract Obsidian REST API key
+        id: apikey
+        run: |
+          # The REST API plugin auto-generates an API key at startup
+          KEY=$(docker exec obsidian cat /vaults/default/.obsidian/plugins/obsidian-local-rest-api/data.json 2>/dev/null | jq -r '.apiKey // empty' || true)
+          if [ -n "$KEY" ]; then
+            echo "key=${KEY}" >> "$GITHUB_OUTPUT"
+            echo "Extracted API key: ${KEY:0:16}..."
+          else
+            echo "WARNING: No API key found"
+          fi
+
       - name: Run integration tests
         run: |
           chmod +x tests/run-tests.sh
-          ./tests/run-tests.sh http://127.0.0.1:27123
+          ./tests/run-tests.sh http://127.0.0.1:27123 "${{ steps.apikey.outputs.key }}"
 
       - name: Capture logs on failure
         if: failure()
