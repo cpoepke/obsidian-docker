@@ -141,5 +141,8 @@ ENV LOCAL_REST_API_PORT=27124
 ENV ELECTRON_DISABLE_GPU=1
 ENV OBSIDIAN_DISABLE_UPDATE_CHECK=1
 
+HEALTHCHECK --interval=10s --timeout=5s --retries=15 --start-period=60s \
+    CMD curl -sf http://127.0.0.1:27123/ || exit 1
+
 USER obsidian
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
