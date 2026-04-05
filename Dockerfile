@@ -2,7 +2,7 @@
 # Obsidian Docker Image with X11 (Xvfb) on Ubuntu
 # Provides REST API access for agent/MCP integration
 # =============================================================================
-ARG OBSIDIAN_VERSION=1.8.9
+ARG OBSIDIAN_VERSION=1.12.7
 ARG TARGETARCH
 
 # ---------------------------------------------------------------------------

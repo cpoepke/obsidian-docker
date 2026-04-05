@@ -24,6 +24,14 @@ wait_for_port() {
     log "Port ${port} is ready (${elapsed}s)"
 }
 
+# ── Validate required env vars ──────────────────────────────────────────────
+
+if [ -z "${LOCAL_REST_API_KEY:-}" ]; then
+    log "ERROR: LOCAL_REST_API_KEY environment variable is required"
+    log "       Set it to a secure random string (e.g., openssl rand -hex 32)"
+    exit 1
+fi
+
 # ── Obsidian app config ─────────────────────────────────────────────────────
 
 OBSIDIAN_APP_DIR="${HOME}/.config/obsidian"
@@ -46,7 +54,7 @@ APPJSON
     # Create vault-specific config to disable restricted mode (enable community plugins)
     cat > "${OBSIDIAN_APP_DIR}/${VAULT_ID}.json" <<VAULTJSON
 {
-  "communityPluginCount": 5,
+  "communityPluginCount": 4,
   "livePreview": true,
   "focusNewTab": true,
   "promptDelete": false,
@@ -78,7 +86,19 @@ if [ -d "${CONFIG_DIR}/plugins" ]; then
     done
 fi
 
-# Ensure plugins are enabled in community-plugins.json
+# Inject the REST API key into the plugin config
+REST_API_DATA="${VAULT_CONFIG_DIR}/plugins/obsidian-local-rest-api/data.json"
+if [ -f "${REST_API_DATA}" ]; then
+    # Use a temp file to avoid partial writes
+    jq --arg key "${LOCAL_REST_API_KEY}" \
+       '.apiKey = $key | .enableAuthentication = true' \
+       "${REST_API_DATA}" > "${REST_API_DATA}.tmp" && \
+       mv "${REST_API_DATA}.tmp" "${REST_API_DATA}"
+    log "Injected REST API key into plugin config"
+else
+    log "WARNING: REST API plugin data.json not found"
+fi
+
 log "Vault config ready at ${VAULT_CONFIG_DIR}"
 
 # ── Start Xvfb ──────────────────────────────────────────────────────────────

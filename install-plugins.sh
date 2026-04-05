@@ -13,11 +13,11 @@ mkdir -p "$PLUGINS_DIR"
 log() { echo "[install-plugins] $*"; }
 
 # Install a plugin from its GitHub release
-# Args: owner/repo  plugin-id  [version]
+# Args: owner/repo  plugin-id  version
 install_plugin() {
     local repo="$1"
     local plugin_id="$2"
-    local version="${3:-latest}"
+    local version="$3"
     local dest="${PLUGINS_DIR}/${plugin_id}"
 
     if [ -d "$dest" ]; then
@@ -27,12 +27,7 @@ install_plugin() {
 
     mkdir -p "$dest"
 
-    local base_url
-    if [ "$version" = "latest" ]; then
-        base_url="https://github.com/${repo}/releases/latest/download"
-    else
-        base_url="https://github.com/${repo}/releases/download/${version}"
-    fi
+    local base_url="https://github.com/${repo}/releases/download/${version}"
 
     log "Installing ${plugin_id} from ${repo} (${version})..."
 
@@ -49,7 +44,7 @@ install_plugin() {
         fi
     done
 
-    # Create default data.json if the plugin needs configuration
+    # Create placeholder data.json for REST API plugin (key injected at runtime by entrypoint)
     if [ "$plugin_id" = "obsidian-local-rest-api" ]; then
         cat > "${dest}/data.json" <<'RESTCFG'
 {
@@ -58,38 +53,30 @@ install_plugin() {
   "insecurePort": 27123,
   "bindingHost": "0.0.0.0",
   "apiKey": "",
-  "enableAuthentication": false
+  "enableAuthentication": true
 }
 RESTCFG
-        log "  Created REST API default config (auth disabled for local use)"
+        log "  Created REST API default config (key injected at runtime)"
     fi
 
     log "Installed ${plugin_id}"
 }
 
 # =============================================================================
-# Plugin registry - add or remove plugins here
+# Plugin registry — pinned versions for reproducible builds
 # =============================================================================
 
 # Local REST API - Core plugin for all REST access to the vault
-# Provides: CRUD operations, search, command execution, periodic notes
-install_plugin "coddingtonbear/obsidian-local-rest-api" "obsidian-local-rest-api"
+install_plugin "coddingtonbear/obsidian-local-rest-api" "obsidian-local-rest-api" "3.5.0"
 
 # Omnisearch - Full-text search across notes, PDFs, images
-# Provides: Intelligent search with HTTP API via Local REST API
-install_plugin "scambier/obsidian-omnisearch" "omnisearch"
+install_plugin "scambier/obsidian-omnisearch" "omnisearch" "1.28.2"
 
 # Smart Connections - AI-powered semantic/vector search
-# Provides: Semantic search, note connections, local embeddings
-install_plugin "brianpetro/obsidian-smart-connections" "smart-connections"
+install_plugin "brianpetro/obsidian-smart-connections" "smart-connections" "4.3.0"
 
 # Dataview - Query engine for vault metadata and structured data
-# Provides: DQL queries accessible via Local REST API
-install_plugin "blacksmithgu/obsidian-dataview" "dataview"
-
-# Graph Analysis - Advanced graph traversal and analysis
-# Provides: Betweenness centrality, closeness, PageRank, community detection
-install_plugin "SkepticMystic/graph-analysis" "graph-analysis"
+install_plugin "blacksmithgu/obsidian-dataview" "dataview" "0.5.70"
 
 log "All plugins installed to ${PLUGINS_DIR}"
 ls -la "$PLUGINS_DIR"

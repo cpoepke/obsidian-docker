@@ -16,7 +16,7 @@ on:
       obsidian_version:
         description: "Obsidian version to build"
         required: false
-        default: "1.8.9"
+        default: "1.12.7"
 
 env:
   REGISTRY: ghcr.io
@@ -43,7 +43,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "obsidian_version=${{ github.event.inputs.obsidian_version }}" >> "$GITHUB_OUTPUT"
           else
-            echo "obsidian_version=1.8.9" >> "$GITHUB_OUTPUT"
+            echo "obsidian_version=1.12.7" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build image
@@ -57,8 +57,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Generate test API key
+        id: apikey
+        run: |
+          KEY=$(openssl rand -hex 32)
+          echo "::add-mask::${KEY}"
+          echo "key=${KEY}" >> "$GITHUB_OUTPUT"
+
       - name: Start container
-        run: docker compose up -d
+        run: LOCAL_REST_API_KEY=${{ steps.apikey.outputs.key }} docker compose up -d
 
       - name: Wait for Obsidian REST API
         run: |
@@ -76,29 +83,10 @@ jobs:
           chmod +x tests/seed-vault.sh
           ./tests/seed-vault.sh
 
-      - name: Extract Obsidian REST API key
-        id: apikey
-        run: |
-          # The REST API plugin auto-generates an API key at startup
-          KEY=$(docker exec obsidian cat /vaults/default/.obsidian/plugins/obsidian-local-rest-api/data.json 2>/dev/null | jq -r '.apiKey // empty' || true)
-          if [ -n "$KEY" ]; then
-            echo "key=${KEY}" >> "$GITHUB_OUTPUT"
-            echo "Extracted API key: ${KEY:0:16}..."
-          else
-            echo "WARNING: No API key found, retrying from /config..."
-            KEY=$(docker exec obsidian cat /config/obsidian/plugins/obsidian-local-rest-api/data.json 2>/dev/null | jq -r '.apiKey // empty' || true)
-            if [ -n "$KEY" ]; then
-              echo "key=${KEY}" >> "$GITHUB_OUTPUT"
-              echo "Extracted API key from /config: ${KEY:0:16}..."
-            else
-              echo "ERROR: No API key found in either location"
-            fi
-          fi
-
       - name: Run integration tests
         run: |
           chmod +x tests/run-tests.sh
-          ./tests/run-tests.sh http://127.0.0.1:27123 "${{ steps.apikey.outputs.key }}"
+          ./tests/run-tests.sh http://127.0.0.1:27123 ${{ steps.apikey.outputs.key }}
 
       - name: Capture logs on failure
         if: failure()
@@ -137,7 +125,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "obsidian_version=${{ github.event.inputs.obsidian_version }}" >> "$GITHUB_OUTPUT"
           else
-            echo "obsidian_version=1.8.9" >> "$GITHUB_OUTPUT"
+            echo "obsidian_version=1.12.7" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Extract image metadata

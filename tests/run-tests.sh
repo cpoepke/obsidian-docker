@@ -92,15 +92,11 @@ assert_json_array_not_empty() {
     fi
 }
 
-# ── Auto-detect API key ────────────────────────────────────────────────────
+# ── Validate API key ───────────────────────────────────────────────────────
 
 if [ -z "$API_KEY" ]; then
-    API_KEY=$(docker exec "${OBSIDIAN_CONTAINER:-obsidian}" \
-        cat /vaults/default/.obsidian/plugins/obsidian-local-rest-api/data.json 2>/dev/null \
-        | jq -r '.apiKey // empty' 2>/dev/null || true)
-    if [ -n "$API_KEY" ]; then
-        log "Auto-detected API key from container"
-    fi
+    log "WARNING: No API key provided. Pass it as the second argument."
+    log "Usage: run-tests.sh <base-url> <api-key>"
 fi
 
 # ── Wait for API readiness ──────────────────────────────────────────────────
@@ -282,7 +278,7 @@ test_commands() {
 test_plugin_installation() {
     section "Plugin Installation Verification"
 
-    local plugins=("obsidian-local-rest-api" "omnisearch" "smart-connections" "dataview" "graph-analysis")
+    local plugins=("obsidian-local-rest-api" "omnisearch" "smart-connections" "dataview")
 
     for plugin_id in "${plugins[@]}"; do
         local result status body
@@ -318,7 +314,6 @@ test_active_plugins() {
     local plugin_checks=(
         "omnisearch:Omnisearch"
         "dataview:Dataview"
-        "graph-analysis:Graph Analysis"
         "smart-connections:Smart Connections"
     )
 
