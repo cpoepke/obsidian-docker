@@ -64,6 +64,13 @@ VAULTJSON
     log "Created obsidian.json and vault config (community plugins enabled)"
 fi
 
+# ── Git vault clone (synchronous) ──────────────────────────────────────────
+
+if [ -n "${GIT_REPO_URL:-}" ]; then
+    log "Running initial git vault clone..."
+    GIT_SYNC_INIT_ONLY=true /usr/local/bin/git-sync.sh || log "WARNING: initial git clone failed"
+fi
+
 # ── Vault initialization ────────────────────────────────────────────────────
 
 log "Initializing vault at ${VAULT_PATH}"
@@ -183,12 +190,22 @@ else
     log "WARNING: REST API may not be available. Obsidian is still running."
 fi
 
+# ── Start git sync watcher ──────────────────────────────────────────────────
+
+GIT_SYNC_PID=""
+if [ -n "${GIT_REPO_URL:-}" ]; then
+    log "Starting git sync watcher..."
+    /usr/local/bin/git-sync.sh &
+    GIT_SYNC_PID=$!
+fi
+
 # ── Signal handling ──────────────────────────────────────────────────────────
 
 cleanup() {
     log "Shutting down..."
     kill "$OBSIDIAN_PID" 2>/dev/null || true
     kill "$XVFB_PID" 2>/dev/null || true
+    kill "${GIT_SYNC_PID:-}" 2>/dev/null || true
     wait
     log "Shutdown complete"
 }

@@ -83,6 +83,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         # Networking & utilities
         ca-certificates \
         curl \
+        git \
+        inotify-tools \
         jq \
         openssl \
         python3 \
@@ -115,7 +117,8 @@ RUN mkdir -p /vaults/default /config/obsidian /config/defaults /tmp/.X11-unix /r
 COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY enable-plugins.py /usr/local/bin/enable-plugins.py
-RUN chmod +x /usr/local/bin/install-plugins.sh /usr/local/bin/entrypoint.sh
+COPY git-sync.sh /usr/local/bin/git-sync.sh
+RUN chmod +x /usr/local/bin/install-plugins.sh /usr/local/bin/entrypoint.sh /usr/local/bin/git-sync.sh
 
 # Copy default plugin configuration
 COPY config/community-plugins.json /config/defaults/community-plugins.json
