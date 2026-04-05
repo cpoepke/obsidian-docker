@@ -12,7 +12,7 @@ services:
       - vault-data:/vaults/default
       - obsidian-config:/config/obsidian
     environment:
-      - LOCAL_REST_API_KEY=${LOCAL_REST_API_KEY:?LOCAL_REST_API_KEY is required}
+      - LOCAL_REST_API_KEY=${LOCAL_REST_API_KEY:-}
       - OBSIDIAN_VAULT_PATH=/vaults/default
       - LOCAL_REST_API_PORT=27124
       - DISPLAY=:99
