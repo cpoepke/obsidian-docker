@@ -84,11 +84,13 @@ fi
 
 # Copy pre-installed plugins into vault if not already there
 # Source is /opt/obsidian-plugins (built into image, not shadowed by PVC mounts)
+# Check for main.js specifically — an empty directory is not a valid install
 if [ -d "/opt/obsidian-plugins/plugins" ]; then
     for plugin_dir in "/opt/obsidian-plugins/plugins"/*/; do
         plugin_name=$(basename "$plugin_dir")
-        if [ ! -d "${VAULT_CONFIG_DIR}/plugins/${plugin_name}" ]; then
-            cp -r "$plugin_dir" "${VAULT_CONFIG_DIR}/plugins/${plugin_name}"
+        if [ ! -f "${VAULT_CONFIG_DIR}/plugins/${plugin_name}/main.js" ]; then
+            mkdir -p "${VAULT_CONFIG_DIR}/plugins/${plugin_name}"
+            cp -r "$plugin_dir"* "${VAULT_CONFIG_DIR}/plugins/${plugin_name}/"
             log "Installed plugin: ${plugin_name}"
         fi
     done
