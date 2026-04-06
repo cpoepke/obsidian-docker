@@ -12,6 +12,7 @@ set -euo pipefail
 #   GIT_USER_EMAIL    — git commit author email  (default: obsidian@n8t.dev)
 #   GIT_SYNC_DEBOUNCE — seconds to wait after last change before commit (default: 30)
 #   GIT_SYNC_INIT_ONLY — if "true", clone/pull then exit without starting watcher
+#   GIT_PULL_INTERVAL  — seconds between periodic pulls from remote (default: disabled)
 # ============================================================================
 
 VAULT_PATH="${OBSIDIAN_VAULT_PATH:-/vaults/default}"
@@ -91,6 +92,20 @@ fi
 # ── Watcher mode ────────────────────────────────────────────────────────────
 
 cd "${VAULT_PATH}"
+
+# Periodic pull — re-pulls from remote on a configurable interval (disabled if unset)
+# Set GIT_PULL_INTERVAL=300 to pull every 5 minutes.
+if [ -n "${GIT_PULL_INTERVAL:-}" ]; then
+    log "Starting periodic pull (interval=${GIT_PULL_INTERVAL}s)..."
+    (
+        while true; do
+            sleep "${GIT_PULL_INTERVAL}"
+            cd "${VAULT_PATH}"
+            git pull --rebase --autostash || log "WARNING: periodic pull failed"
+            log "Periodic pull complete"
+        done
+    ) &
+fi
 
 commit_and_push() {
     cd "${VAULT_PATH}"
