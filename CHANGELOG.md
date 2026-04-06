@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.5](https://github.com/cpoepke/obsidian-docker/compare/v0.1.4...v0.1.5) (2026-04-06)
+
+
+### Features
+
+* add on-demand git pull server and periodic pull interval ([#7](https://github.com/cpoepke/obsidian-docker/issues/7)) ([aeee558](https://github.com/cpoepke/obsidian-docker/commit/aeee5584c90432b91985784190724dc250b2ab61))
+
+
+### Bug Fixes
+
+* check for main.js before skipping plugin copy ([126f329](https://github.com/cpoepke/obsidian-docker/commit/126f32912754d676bfc80f84b2bbb942d6c8fb81))
+* install plugins to /opt/obsidian-plugins to survive PVC mounts ([760e556](https://github.com/cpoepke/obsidian-docker/commit/760e556087b9dc7f5341b982524dd187e7618acb))
+
 ## [0.1.4](https://github.com/cpoepke/obsidian-docker/compare/v0.1.3...v0.1.4) (2026-04-05)
 
 
