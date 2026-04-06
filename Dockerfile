@@ -118,7 +118,8 @@ COPY install-plugins.sh /usr/local/bin/install-plugins.sh
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY enable-plugins.py /usr/local/bin/enable-plugins.py
 COPY git-sync.sh /usr/local/bin/git-sync.sh
-RUN chmod +x /usr/local/bin/install-plugins.sh /usr/local/bin/entrypoint.sh /usr/local/bin/git-sync.sh
+COPY git-pull-server.py /usr/local/bin/git-pull-server.py
+RUN chmod +x /usr/local/bin/install-plugins.sh /usr/local/bin/entrypoint.sh /usr/local/bin/git-sync.sh /usr/local/bin/git-pull-server.py
 
 # Copy default plugin configuration
 COPY config/community-plugins.json /config/defaults/community-plugins.json
@@ -130,7 +131,8 @@ RUN /usr/local/bin/install-plugins.sh /opt/obsidian-plugins && \
 # Ports:
 #   27124 - Local REST API (HTTPS)
 #   27123 - Local REST API (HTTP, optional)
-EXPOSE 27124 27123
+#   27125 - Git pull server (internal, on-demand sync)
+EXPOSE 27124 27123 27125
 
 # Volumes for vault data and Obsidian config persistence
 VOLUME ["/vaults", "/config/obsidian"]

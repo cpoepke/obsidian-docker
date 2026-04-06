@@ -202,6 +202,13 @@ if [ -n "${GIT_REPO_URL:-}" ]; then
     GIT_SYNC_PID=$!
 fi
 
+GIT_PULL_SERVER_PID=""
+if [ -n "${GIT_REPO_URL:-}" ]; then
+    log "Starting git pull server on port 27125..."
+    python3 /usr/local/bin/git-pull-server.py &
+    GIT_PULL_SERVER_PID=$!
+fi
+
 # ── Signal handling ──────────────────────────────────────────────────────────
 
 cleanup() {
@@ -209,6 +216,7 @@ cleanup() {
     kill "$OBSIDIAN_PID" 2>/dev/null || true
     kill "$XVFB_PID" 2>/dev/null || true
     kill "${GIT_SYNC_PID:-}" 2>/dev/null || true
+    kill "${GIT_PULL_SERVER_PID:-}" 2>/dev/null || true
     wait
     log "Shutdown complete"
 }
