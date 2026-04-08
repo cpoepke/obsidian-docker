@@ -68,8 +68,9 @@ else
 fi
 
 # Ensure .gitignore excludes Obsidian workspace/cache files
+# Match either the full .obsidian/ folder exclusion or individual workspace.json entry
 GITIGNORE="${VAULT_PATH}/.gitignore"
-if [ ! -f "${GITIGNORE}" ] || ! grep -q 'workspace.json' "${GITIGNORE}" 2>/dev/null; then
+if [ ! -f "${GITIGNORE}" ] || ! grep -qE '^\.obsidian/?$|workspace\.json' "${GITIGNORE}" 2>/dev/null; then
     cat >> "${GITIGNORE}" <<'EOF'
 
 # Obsidian ephemeral files (auto-added by git-sync)
@@ -115,6 +116,8 @@ commit_and_push() {
     fi
     local msg="vault: auto-sync $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
     git commit -m "${msg}" || { log "WARNING: commit failed"; return 1; }
+    # Pull-rebase before push to avoid divergence when remote has new commits
+    git pull --rebase --autostash || { log "WARNING: pull-rebase before push failed"; return 1; }
     git push origin HEAD || { log "WARNING: push failed, will retry next cycle"; return 1; }
     log "Synced: ${msg}"
 }
